@@ -14,6 +14,14 @@ bgImage.onload = function () {
 };
 bgImage.src = "images/space background1.png";
 
+//Projectile image
+var projectileReady = false;
+var projectileImage = new Image();
+projectileImage.onload = function () {
+    projectileReady = true;
+};
+projectileImage.src = "images/projectile.png";
+
 // Hero image
 var heroReady = false;
 var heroImage = new Image();
@@ -41,6 +49,10 @@ var hero = {
     x: 0,  // where on the canvas are they?
     y: 0  // where on the canvas are they?
 };
+
+//Projectile object
+var projectile = null;
+
 var monster = {
     // for this version, the monster does not move, so just and x and y
     x: 0,
@@ -68,11 +80,25 @@ addEventListener("keyup", function (e) {
     delete keysDown[e.keyCode];
 }, false);
 
+addEventListener("keydown", function (e) {
+    if (e.keyCode === 32) { // Space key
+        shootProjectile();
+    }
+}, false);
+
 // end keyboard control =============================================
 
 
 
-
+function shootProjectile() {
+    if (!projectile) {
+        projectile = {
+            x: hero.x + 16, // Adjust the position as per your requirements
+            y: hero.y + 16, // Adjust the position as per your requirements
+            speed: 200, // Adjust the speed as per your requirements
+        };
+    }
+}
 
 
 // define functions ==============================================
@@ -96,8 +122,7 @@ var update = function (modifier) {
         hero.x += hero.speed * modifier;
     }
 
-
-
+   
 
     // Are they touching?
     if (
@@ -108,6 +133,14 @@ var update = function (modifier) {
     ) {
         ++monstersCaught;       // keep track of our “score”
         reset();       // start a new cycle
+    }
+
+    if (projectile) {
+        projectile.y -= projectile.speed * modifier;
+
+        if (projectile.y < 0) {
+            projectile = null;
+        }
     }
 
 };
@@ -128,6 +161,9 @@ var render = function () {
         ctx.drawImage(monsterImage, monster.x, monster.y);
     }
 
+    if (projectile && projectileReady) {
+        ctx.drawImage(projectileImage, projectile.x, projectile.y);
+    }
 
     // Score
     ctx.fillStyle = "rgb(250, 250, 250)";
