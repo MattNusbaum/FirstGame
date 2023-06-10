@@ -4,6 +4,21 @@ var ctx = canvas.getContext("2d");
 canvas.width = 1000;
 canvas.height = 1000;
 document.body.appendChild(canvas);
+let gameover = false;
+let won = false;
+
+
+let chessBoard = [
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+    ['x','x','x','x','x','x','x','x','x'],
+];
 
 // load images ========================================================
 // Background image
@@ -12,7 +27,23 @@ var bgImage = new Image();
 bgImage.onload = function () {
     bgReady = true;
 };
-bgImage.src = "images/space background1.png";
+bgImage.src = "images/background2.png";
+
+// side images
+let sidesReady = false;
+let sidesImage = new Image();
+sidesImage.onload = function () {
+    sidesReady = true;
+};
+sidesImage.src = "images/sides.jpg";
+
+// top images
+let topReady = false;
+let topImage = new Image();
+topImage.onload = function () {
+    topReady = true;
+};
+topImage.src = "images/top.jpg";
 
 //Projectile image
 var projectileReady = false;
@@ -28,7 +59,7 @@ var heroImage = new Image();
 heroImage.onload = function () {
     heroReady = true;
 };
-heroImage.src = "images/hero.png";
+heroImage.src = "images/ship.png";
 
 // Monster image
 var monsterReady = false;
@@ -36,16 +67,27 @@ var monsterImage = new Image();
 monsterImage.onload = function () {
     monsterReady = true;
 };
-monsterImage.src = "images/monster.png";
+monsterImage.src = "images/asteroid.png";
 
 // done with load images ========================================================
+
+
+
+// load sound objects ===================================================
+let soundGameOver = "sounds/gameover.wav";
+let soundWon = "sounds/gamewon.wav";
+let soundShot = "sounds/shot.wav";
+let soundHit = "sounds/hit.wav";
+let soundEfx = document.getElementById("soundEfx");
+
+
 
 
 // define objects and variables we need =========================================
 
 // Game objects
 var hero = {
-    speed: 100, // movement in pixels per second
+    speed: 456, // movement in pixels per second
     x: 0,  // where on the canvas are they?
     y: 0  // where on the canvas are they?
 };
@@ -95,7 +137,7 @@ function shootProjectile() {
         projectile = {
             x: hero.x + 16, // Adjust the position as per your requirements
             y: hero.y + 16, // Adjust the position as per your requirements
-            speed: 200, // Adjust the speed as per your requirements
+            speed: 600, // Adjust the speed as per your requirements
         };
     }
 }
@@ -109,16 +151,16 @@ function shootProjectile() {
 var update = function (modifier) {
 
     //  adjust based on keys
-    if (38 in keysDown && hero.y > 32 + 0) { //  holding up key
+    if (38 in keysDown && hero.y > 32 + 4) { //  holding up key
         hero.y -= hero.speed * modifier;
     }
-    if (40 in keysDown && hero.y < canvas.height - (64 + 0)) { //  holding down key
+    if (40 in keysDown && hero.y < canvas.height - (64 + 6)) { //  holding down key
         hero.y += hero.speed * modifier;
     }
-    if (37 in keysDown && hero.x > (32 + 0)) { // holding left key
+    if (37 in keysDown && hero.x > (32 + 4)) { // holding left key
         hero.x -= hero.speed * modifier;
     }
-    if (39 in keysDown && hero.x < canvas.width - (64 + 0)) { // holding right key
+    if (39 in keysDown && hero.x < canvas.width - (64 + 6)) { // holding right key
         hero.x += hero.speed * modifier;
     }
 
@@ -130,9 +172,15 @@ var update = function (modifier) {
         && monster.x <= (hero.x + 32)
         && hero.y <= (monster.y + 32)
         && monster.y <= (hero.y + 32)
-    ) {
-        ++monstersCaught;       // keep track of our “score”
+    ) { soundEfx.src = soundShot;
+        soundEfx.play();
+        ++monstersCaught;       // keep track of our â€œscoreâ€
         reset();       // start a new cycle
+    }
+    if(monstersCaught === 5) {
+        // change sound effect and play it.
+        soundEfx.src = soundWon;
+        soundEfx.play();
     }
 
     if (projectile) {
@@ -142,7 +190,6 @@ var update = function (modifier) {
             projectile = null;
         }
     }
-
 };
 
 
@@ -164,41 +211,70 @@ var render = function () {
     if (projectile && projectileReady) {
         ctx.drawImage(projectileImage, projectile.x, projectile.y);
     }
-
+    if (sidesReady) {
+        ctx.drawImage(sidesImage, 0, 0);
+        ctx.drawImage(sidesImage, 0, 966);
+    }
+    if (topReady) {
+        ctx.drawImage(topImage, 0, 0);
+        ctx.drawImage(topImage, 966, 0);
+    }
     // Score
     ctx.fillStyle = "rgb(250, 250, 250)";
     ctx.font = "24px Helvetica";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
+    ctx.fillText("Asteroids Destroyed: " + monstersCaught, 32, 32);
 
 }
 
 
 
+// Reset the game when the player catches a monster
+var reset = function () {
+    placeItem(hero);
+    placeItem(monster);
+};
+
+
+let placeItem = function (character)
+{
+    let X = 5;
+    let Y = 6;
+    let success = false;
+    while(!success) {
+        X = Math.floor( Math.random( ) * 9 );
+
+        Y = Math.floor( Math.random( ) * 9 );
+
+        if( chessBoard[X][Y] === 'x' ) {
+            success = true;
+        }
+    }
+    chessBoard[X][Y] = 'O';
+    character.x = (X*100) + 32;
+    character.y = (Y*100) + 32;
+}
+
+
+
 // The main game loop
-var main = function () {
-    var now = Date.now();
-    var delta = now - then;
+let main = function () {
+
+    if(gameover == false){
+    let now = Date.now();
+    let delta = now - then;
     update(delta / 1000);
     render();
     then = now;
     //  Request to do this again ASAP
     requestAnimationFrame(main);
-};
-
-
-
-// Reset the game when the player catches a monster
-var reset = function () {
-    hero.x = (canvas.width / 2) - 16;
-    hero.y = (canvas.height / 2) - 16;
-
-    //Place the monster somewhere on the screen randomly
-    // but not in the hedges, Article in wrong, the 64 needs to be 
-    //  hedge 32 + hedge 32 + char 32 = 96
-    monster.x = 32 + (Math.random() * (canvas.width - 96));
-    monster.y = 32 + (Math.random() * (canvas.height - 96));
+    }
+    else {
+        if(won == true){
+            alert("You Won!")
+        }
+    }
 };
 
 

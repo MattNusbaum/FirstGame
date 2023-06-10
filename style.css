@@ -1,0 +1,9 @@
+body{
+    background-color: rgb(226, 203, 71);
+    color: #FF6A05;
+    text-align: center;
+}
+#startButton{
+    text-align: center;
+    margin: 1%;
+}
