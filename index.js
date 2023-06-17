@@ -1,4 +1,4 @@
-// Create the canvas
+//id // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 canvas.width = 1000;
@@ -283,6 +283,30 @@ var update = function (modifier) {
         soundEfx.play();
     }
 
+    // Update projectile position
+    if (projectile) {
+        projectile.y -= projectile.speed * modifier;
+
+        // Check if projectile hits the monster
+        if (
+            projectile.x <= (monster.x + 32) &&
+            monster.x <= (projectile.x + 32) &&
+            projectile.y <= (monster.y + 32) &&
+            monster.y <= (projectile.y + 32)
+        ) {
+            soundEfx.src = soundHit;
+            soundEfx.play();
+            ++monstersCaught; // Increase the score
+            resetMonster(); // Reset monster position
+            projectile = null; // Remove the projectile
+        }
+
+        // Check if projectile goes off-screen
+        if (projectile.y < 0) {
+            projectile = null; // Remove the projectile
+        }
+    }
+
     if (projectile) {
         projectile.y -= projectile.speed * modifier;
 
@@ -290,6 +314,19 @@ var update = function (modifier) {
             projectile = null;
         }
     }
+
+    if (monstersCaught === 5) {
+        // change sound effect and play it.
+        soundEfx.src = soundWon;
+        soundEfx.play();
+        resetGame(); // Reset the game if the score reaches 5
+    }
+    
+};
+
+var resetGame = function () {
+    monstersCaught = 0;
+    reset();
 };
 
 
