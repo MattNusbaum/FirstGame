@@ -78,7 +78,10 @@ let soundGameOver = "sounds/gameover.wav";
 let soundWon = "sounds/gamewon.wav";
 let soundShot = "sounds/shot.wav";
 let soundHit = "sounds/hit.wav";
+let soundDamage = "sounds/damage.wav";
+let soundFire = "sounds/fire.wav";
 let soundEfx = document.getElementById("soundEfx");
+
 
 
 
@@ -101,6 +104,7 @@ var monster = {
     y: 0
 };
 var monstersCaught = 0;
+var damageTaken = 0;
 
 
 /////////////ANIMATIONS////////////
@@ -161,6 +165,8 @@ addEventListener("keyup", function (e) {
 addEventListener("keydown", function (e) {
     if (e.keyCode === 32) { // Space key
         shootProjectile();
+        soundEfx.src = soundFire;
+        soundEfx.play();
     }
 }, false);
 
@@ -235,9 +241,9 @@ var update = function (modifier) {
         && monster.x <= (hero.x + 32)
         && hero.y <= (monster.y + 32)
         && monster.y <= (hero.y + 32)
-    ) { soundEfx.src = soundShot;
+    ) { soundEfx.src = soundDamage;
         soundEfx.play();
-        ++monstersCaught;       // keep track of our “score”
+        ++damageTaken;       // keep track of our “score”
         reset();       // start a new cycle
     }
 
@@ -277,11 +283,18 @@ var update = function (modifier) {
     }
 
 
-    if(monstersCaught === 5) {
+    // if(monstersCaught === 5) {
+    //     // change sound effect and play it.
+    //     soundEfx.src = soundWon;
+    //     soundEfx.play();
+    // }
+
+   // if(damageTaken === 5) {
+   //     gameover = true;
         // change sound effect and play it.
-        soundEfx.src = soundWon;
-        soundEfx.play();
-    }
+        // soundEfx.src = soundGameOver;
+        // soundEfx.play();
+    //}
 
     // Update projectile position
     if (projectile) {
@@ -297,8 +310,7 @@ var update = function (modifier) {
             soundEfx.src = soundHit;
             soundEfx.play();
             ++monstersCaught; // Increase the score
-            resetMonster(); // Reset monster position
-            projectile = null; // Remove the projectile
+            reset(); // Reset monster position
         }
 
         // Check if projectile goes off-screen
@@ -315,17 +327,18 @@ var update = function (modifier) {
         }
     }
 
-    if (monstersCaught === 5) {
-        // change sound effect and play it.
-        soundEfx.src = soundWon;
-        soundEfx.play();
-        resetGame(); // Reset the game if the score reaches 5
-    }
+    // if (monstersCaught === 5) {
+    //     alert("Well done, Pilot. Another System is Saved!")
+    //     resetGame(); // Reset the game if the score reaches 5
+    // }
+
+    
     
 };
 
 var resetGame = function () {
     monstersCaught = 0;
+    damageTaken = 0;
     reset();
 };
 
@@ -363,11 +376,17 @@ var render = function () {
         ctx.drawImage(topImage, 966, 0);
     }
     // Score
-    ctx.fillStyle = "rgb(250, 250, 250)";
-    ctx.font = "24px Helvetica";
+    ctx.fillStyle = "rgb(162, 228, 184)";
+    ctx.font = "24px Courier New, monospace";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.fillText("Asteroids Destroyed: " + monstersCaught, 32, 32);
+    ctx.fillText("Asteroids Destroyed: " + monstersCaught, 34, 34);
+
+    ctx.fillStyle = "rgb(220, 20, 60)";
+    ctx.font = "24px Courier New, monospace";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "top";
+    ctx.fillText("Ship Damage: " + damageTaken, 950, 34);
 
 }
 
@@ -375,9 +394,25 @@ var render = function () {
 
 // Reset the game when the player catches a monster
 var reset = function () {
+
     placeItem(hero);
     placeItem(monster);
-};
+   
+   if(monstersCaught === 5) {
+        alert("Well done, Pilot. Another System is Saved!");
+        soundEfx.src = soundWon;
+        soundEfx.play();
+        resetGame();
+        }
+    if (damageTaken === 5) {
+        gameover == true;
+        alert("The System is Doomed. New Pilot Required...");
+        soundEfx.src = soundGameOver;
+        soundEfx.play();
+        resetGame(); 
+        }
+    };
+
 
 
 let placeItem = function (character)
@@ -413,11 +448,14 @@ let main = function () {
     //  Request to do this again ASAP
     requestAnimationFrame(main);
     }
-    else {
-        if(won == true){
-            alert("You Won!")
-        }
-    }
+    // else {
+    //     if(won == true){
+    //         alert("You Won!")
+    //     }
+    //     if(gameover == true){
+    //         alert("The System is Doomed. New Pilot Required...")
+    //     }
+    // }
 };
 
 
