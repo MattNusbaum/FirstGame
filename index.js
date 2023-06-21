@@ -339,7 +339,8 @@ var update = function (modifier) {
 var resetGame = function () {
     monstersCaught = 0;
     damageTaken = 0;
-    reset();
+    placeItem(monster);
+    placeItem(hero);
 };
 
 
@@ -396,6 +397,7 @@ var render = function () {
 var reset = function () {
 
     placeItem(monster);
+    placeItem(hero);
    
    if(monstersCaught === 5) {
         alert("Well done, Pilot. Another System is Saved!");
@@ -404,8 +406,7 @@ var reset = function () {
         resetGame();
         }
     if (damageTaken === 5) {
-        gameover == true;
-        alert("The System is Doomed. New Pilot Required...");
+        // alert("The System is Doomed. New Pilot Required...");
         soundEfx.src = soundGameOver;
         soundEfx.play();
         resetGame(); 
