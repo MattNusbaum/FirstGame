@@ -395,7 +395,6 @@ var render = function () {
 // Reset the game when the player catches a monster
 var reset = function () {
 
-    placeItem(hero);
     placeItem(monster);
    
    if(monstersCaught === 5) {
